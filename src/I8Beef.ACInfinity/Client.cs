@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using I8Beef.ACInfinity.Protocol;
-using System.Linq;
+using System.Text.Json;
 
 namespace I8Beef.ACInfinity
 {
@@ -19,6 +18,11 @@ namespace I8Beef.ACInfinity
         private readonly TimeSpan _timeout;
 
         private string? _token;
+
+        private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Client"/> class.
@@ -43,125 +47,104 @@ namespace I8Beef.ACInfinity
         }
 
         /// <inheritdoc />
-        public async Task<ResponseBase> GetAllDeviceInfo(CancellationToken cancellationToken = default)
+        public async Task<List<Device>> GetAllDeviceInfo(CancellationToken cancellationToken = default)
         {
             if (_token is null)
             {
                 await Login(cancellationToken);
             }
 
-            return await Get<ResponseBase>($"{_baseUrl}/api/user/devInfoListAll", cancellationToken)
-                .ConfigureAwait(false);
-        }
-
-        /// <inheritdoc />
-        public async Task<ResponseBase> GetDevicePortSettings(string deviceId, int port, CancellationToken cancellationToken = default)
-        {
-            if (_token is null)
+            var model = new GetAllDeviceRequest
             {
-                await Login(cancellationToken);
-            }
-
-            var model = new Dictionary<string, string>
-            {
-                { "devId", deviceId },
-                { "port", port.ToString() }
+                UserId = _token!
             };
 
-            return await Post<ResponseBase>($"{_baseUrl}/api/dev/getdevModeSettingList", model, cancellationToken)
+            return await Post<List<Device>, GetAllDeviceRequest>($"{_baseUrl}/api/user/devInfoListAll", model, cancellationToken)
                 .ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public async Task<ResponseBase> SetDevicePortSettings(string deviceId, int port, IDictionary<string, int> settings, CancellationToken cancellationToken = default)
+        public async Task<PortSettings> GetDevicePortSettings(string deviceId, int port, CancellationToken cancellationToken = default)
         {
             if (_token is null)
             {
                 await Login(cancellationToken);
             }
 
-            var activeSettings = await GetDevicePortSettings(deviceId, port, cancellationToken);
-
-            var model = activeSettings.Data.ToDictionary(x => x.Key, x => x.Value.ToString());
-            ;
-            foreach (var setting in settings)
+            var model = new GetDevicePortSettingsRequest
             {
-                model[setting.Key] = setting.Value.ToString();
+                DeviceId = deviceId,
+                Port = port
+            };
+
+            return await Post<PortSettings, GetDevicePortSettingsRequest>($"{_baseUrl}/api/dev/getdevModeSettingList", model, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task<PortSettings> SetDevicePortSettings(string deviceId, int port, PortInfo settings, CancellationToken cancellationToken = default)
+        {
+            if (_token is null)
+            {
+                await Login(cancellationToken);
             }
 
-            return await Post<ResponseBase>($"{_baseUrl}/api/dev/addDevMode", model, cancellationToken)
+            return await Post<PortSettings, PortInfo>($"{_baseUrl}/api/dev/addDevMode", settings, cancellationToken)
                 .ConfigureAwait(false);
         }
 
         /// <inheritdoc />
         public async Task Login(CancellationToken cancellationToken = default)
         {
-            var model = new Dictionary<string, string>
+            var model = new LoginRequest
             {
-                { "appEmail", _username },
-                { "appPasswordl", _password }
+                AppEmail = _username,
+                AppPasswordL = _password
             };
 
-            var response = await Post<ResponseBase>($"{_baseUrl}/api/user/appUserLogin", model, cancellationToken)
+            var response = await Post<AppData, LoginRequest>($"{_baseUrl}/api/user/appUserLogin", model, cancellationToken)
                     .ConfigureAwait(false);
 
-            _token = response.Data["appId"].ToString();
+            _token = response.AppId;
         }
 
-        private async Task<TType> Get<TType>(string url, CancellationToken cancellationToken = default)
-            where TType : class
+        private async Task<TResponse> Post<TResponse, TRequest>(string url, TRequest payload, CancellationToken cancellationToken = default)
+            where TRequest : class
+            where TResponse : class
         {
-            var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+            var json = JsonSerializer.Serialize(payload);
+            var dictionary = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
 
-            requestMessage.Headers.Add("User-Agent", "ACController/1.8.2 (com.acinfinity.humiture; build:489; iOS 16.5.1) Alamofire/5.4.4");
-            requestMessage.Headers.Add("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-
-            if (_token != null)
+            var correctedDictionary = new Dictionary<string, string>();
+            foreach (var key in dictionary!.Keys)
             {
-                requestMessage.Headers.Add("token", _token);
+                correctedDictionary.Add(key, dictionary[key].ToString());
             }
 
-            var response = await SendAsyncWithTimeout(requestMessage, cancellationToken)
-                .ConfigureAwait(false);
-
-            response.EnsureSuccessStatusCode();
-
-            var responseString = await response.Content.ReadAsStringAsync()
-                .ConfigureAwait(false);
-
-            return JsonSerializer<TType>.Deserialize(responseString);
-        }
-
-        private async Task<TType> Post<TType>(string url, IDictionary<string, string> payload, CancellationToken cancellationToken = default)
-            where TType : class
-        {
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, url)
             {
-                Content = new FormUrlEncodedContent(payload)
+                Content = new FormUrlEncodedContent(correctedDictionary)
             };
 
             requestMessage.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
             requestMessage.Headers.Add("User-Agent", "ACController/1.8.2 (com.acinfinity.humiture; build:489; iOS 16.5.1) Alamofire/5.4.4");
-            requestMessage.Headers.Add("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 
             if (_token != null)
             {
                 requestMessage.Headers.Add("token", _token);
             }
 
-            // Set basic auth header
-            var byteArray = Encoding.ASCII.GetBytes(_username + ":" + _password);
-            requestMessage.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-
             var response = await SendAsyncWithTimeout(requestMessage, cancellationToken)
                 .ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();
 
+            // TODO: Enact reponse code check 
+
             var responseString = await response.Content.ReadAsStringAsync()
                 .ConfigureAwait(false);
 
-            return JsonSerializer<TType>.Deserialize(responseString);
+            return JsonSerializer.Deserialize<ResponseBase<TResponse>>(responseString, _jsonOptions)!.Data;
         }
 
         /// <summary>

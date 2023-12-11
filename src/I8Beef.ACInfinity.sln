@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34309.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I8Beef.ACInfinity", "I8Beef.ACInfinity\I8Beef.ACInfinity.csproj", "{7101CEFB-81B2-4920-BE40-35F576E98206}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "I8Beef.ACInfinity", "I8Beef.ACInfinity\I8Beef.ACInfinity.csproj", "{7101CEFB-81B2-4920-BE40-35F576E98206}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I8Beef.ACInfinity.TestClient", "I8Beef.ACInfinity.TestClient\I8Beef.ACInfinity.TestClient.csproj", "{3B4DAF06-E99F-4197-BBD6-99CD0E3A2A4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{7101CEFB-81B2-4920-BE40-35F576E98206}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7101CEFB-81B2-4920-BE40-35F576E98206}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7101CEFB-81B2-4920-BE40-35F576E98206}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B4DAF06-E99F-4197-BBD6-99CD0E3A2A4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B4DAF06-E99F-4197-BBD6-99CD0E3A2A4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B4DAF06-E99F-4197-BBD6-99CD0E3A2A4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B4DAF06-E99F-4197-BBD6-99CD0E3A2A4B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

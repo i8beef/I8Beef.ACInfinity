@@ -15,7 +15,7 @@ namespace I8Beef.ACInfinity
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The response.</returns>
-        Task<ResponseBase> GetAllDeviceInfo(CancellationToken cancellationToken = default);
+        Task<List<Device>> GetAllDeviceInfo(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get device port settings.
@@ -24,23 +24,23 @@ namespace I8Beef.ACInfinity
         /// <param name="port">Port number.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The response.</returns>
-        Task<ResponseBase> GetDevicePortSettings(string deviceId, int port, CancellationToken cancellationToken = default);
+        Task<PortSettings> GetDevicePortSettings(string deviceId, int port, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// 
+        /// Login.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The response.</returns>
         Task Login(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// 
+        /// Sets a device ports settings.
         /// </summary>
         /// <param name="deviceId">Device id.</param>
         /// <param name="port">Port number.</param>
         /// <param name="settings">Settings.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The response.</returns>
-        Task<ResponseBase> SetDevicePortSettings(string deviceId, int port, IDictionary<string, int> settings, CancellationToken cancellationToken = default);
+        Task<PortSettings> SetDevicePortSettings(string deviceId, int port, PortInfo settings, CancellationToken cancellationToken = default);
     }
 }
