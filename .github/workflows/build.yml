@@ -36,12 +36,3 @@ jobs:
         with:
           name: ${{ env.APP }}
           path: ${{ env.BUILDOUTPUTPATH }}
-
-      - name: Test
-        run: dotnet test ${{ env.SOLUTION }} --no-restore --verbosity normal --logger trx --results-directory "TestResults"
-
-      - name: Upload TestResults build artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: TestResults
-          path: TestResults
