@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Threading.Tasks;
-using System.Threading;
-using I8Beef.ACInfinity.Protocol;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using I8Beef.ACInfinity.Protocol;
 
 namespace I8Beef.ACInfinity
 {
