@@ -193,19 +193,19 @@ namespace I8Beef.ACInfinity.Protocol
         /// Gets or Sets the ectds type.
         /// </summary>
         [JsonPropertyName("ectdsType")]
-        public string? EctdsType { get; set; }
+        public int? EctdsType { get; set; }
 
         /// <summary>
         /// Gets or Sets the tds unit.
         /// </summary>
         [JsonPropertyName("tdsUnit")]
-        public string? TdsUnit { get; set; }
+        public int? TdsUnit { get; set; }
 
         /// <summary>
         /// Gets or Sets the ec unit.
         /// </summary>
         [JsonPropertyName("ecUnit")]
-        public string? EcUnit { get; set; }
+        public int? EcUnit { get; set; }
 
         /// <summary>
         /// Gets or Sets the sensor count.
